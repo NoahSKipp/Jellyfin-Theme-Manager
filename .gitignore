@@ -1,0 +1,30 @@
+## Build output
+bin/
+obj/
+artifacts/
+publish/
+*.zip
+
+## NuGet
+*.nupkg
+packages/
+
+## Test output
+[Tt]est[Rr]esult*/
+*.trx
+coverage*.json
+coverage*.xml
+
+## IDEs
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.swp
+*~
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini
