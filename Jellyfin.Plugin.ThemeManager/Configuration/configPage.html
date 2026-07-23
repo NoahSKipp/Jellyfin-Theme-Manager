@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Theme Manager</title>
+</head>
+<body>
+<div id="themeManagerPage" data-role="page" class="page type-interior pluginConfigurationPage"
+     data-require="emby-input,emby-button,emby-select,emby-checkbox,emby-textarea">
+    <div data-role="content">
+        <div class="content-primary">
+
+            <style>
+                #themeManagerPage .tmSection { margin-bottom: 2.6em; }
+                #themeManagerPage .tmSection > h2 { margin-bottom: .25em; }
+                #themeManagerPage .tmHint { opacity: .7; margin: 0 0 1em; font-size: .92em; line-height: 1.45; }
+                #themeManagerPage .tmBar {
+                    display: flex; flex-wrap: wrap; gap: .6em; align-items: center;
+                    padding: .9em 1.1em; border-radius: .35em;
+                    background: rgba(127, 127, 127, .12); margin-bottom: 1.4em;
+                }
+                #themeManagerPage .tmBarText { flex: 1 1 16em; min-width: 0; }
+                #themeManagerPage .tmBarText strong { font-size: 1.05em; }
+                #themeManagerPage .tmBarSub { opacity: .7; font-size: .85em; margin-top: .2em; }
+                #themeManagerPage .tmGrid {
+                    display: grid; gap: 1em;
+                    grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
+                }
+                #themeManagerPage .tmCard {
+                    display: flex; flex-direction: column; overflow: hidden;
+                    border: 1px solid rgba(127, 127, 127, .35); border-radius: .4em;
+                    background: rgba(127, 127, 127, .07);
+                }
+                #themeManagerPage .tmCard.is-active { border-color: #00a4dc; box-shadow: 0 0 0 1px #00a4dc inset; }
+                #themeManagerPage .tmSwatch { height: 5.5em; background-size: cover; background-position: center; }
+                #themeManagerPage .tmCardBody { padding: .75em .9em; flex: 1 1 auto; }
+                #themeManagerPage .tmCardBody h3 { margin: 0 0 .15em; font-size: 1.02em; }
+                #themeManagerPage .tmMeta { font-size: .8em; opacity: .65; margin-bottom: .5em; }
+                #themeManagerPage .tmDesc { font-size: .87em; margin: 0; line-height: 1.4; opacity: .9; }
+                #themeManagerPage .tmTags { margin-top: .55em; display: flex; flex-wrap: wrap; gap: .3em; }
+                #themeManagerPage .tmTag {
+                    font-size: .72em; padding: .12em .5em; border-radius: 1em;
+                    background: rgba(127, 127, 127, .25);
+                }
+                #themeManagerPage .tmCardActions {
+                    display: flex; flex-wrap: wrap; gap: .4em; padding: .6em .9em .8em;
+                }
+                #themeManagerPage .tmCardActions .emby-button { margin: 0; padding: .4em .9em; font-size: .82em; }
+                #themeManagerPage .tmBadge {
+                    font-size: .72em; padding: .12em .5em; border-radius: .25em;
+                    background: #00a4dc; color: #fff; margin-left: .4em; vertical-align: middle;
+                }
+                #themeManagerPage .tmRow {
+                    display: flex; align-items: center; gap: .75em; padding: .6em .2em;
+                    border-bottom: 1px solid rgba(127, 127, 127, .22);
+                }
+                #themeManagerPage .tmRowMain { flex: 1 1 auto; min-width: 0; }
+                #themeManagerPage .tmRowMain code { font-size: .8em; opacity: .7; word-break: break-all; }
+                #themeManagerPage .tmAssets {
+                    display: grid; gap: 1em; grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
+                }
+                #themeManagerPage .tmAsset {
+                    border: 1px solid rgba(127, 127, 127, .35); border-radius: .4em; padding: .9em;
+                }
+                #themeManagerPage .tmAsset h4 { margin: 0 0 .15em; }
+                #themeManagerPage .tmAssetHint { font-size: .8em; opacity: .65; margin: 0 0 .7em; }
+                #themeManagerPage .tmPreview {
+                    height: 4.5em; margin-bottom: .7em; border-radius: .25em;
+                    background: repeating-conic-gradient(rgba(127,127,127,.18) 0% 25%, transparent 0% 50%) 50% / 1.2em 1.2em;
+                    display: flex; align-items: center; justify-content: center;
+                }
+                #themeManagerPage .tmPreview img { max-height: 100%; max-width: 100%; object-fit: contain; }
+                #themeManagerPage .tmPreview span { font-size: .8em; opacity: .55; }
+                #themeManagerPage .tmEmpty { opacity: .6; font-style: italic; padding: .8em .2em; }
+                #themeManagerPage .tmInline { display: flex; flex-wrap: wrap; gap: .6em; align-items: flex-end; }
+                #themeManagerPage .tmInline > * { margin: 0; }
+                #themeManagerPage .tmSearch { max-width: 22em; }
+            </style>
+
+            <div class="verticalSection">
+                <h1 style="margin-bottom:.2em;">Theme Manager</h1>
+                <p class="tmHint" style="max-width:56em;">
+                    Install community CSS themes, link your own stylesheets and replace Jellyfin's logo,
+                    icons and splash screen. Everything you enable here is composed into a single
+                    stylesheet and published through the server's branding CSS, so every client that
+                    loads branding picks it up.
+                </p>
+
+                <div class="tmBar">
+                    <div class="tmBarText">
+                        <strong id="tmActiveName">Nothing applied</strong>
+                        <div class="tmBarSub" id="tmActiveSub">No theme is currently active.</div>
+                    </div>
+                    <button is="emby-button" type="button" class="raised" id="tmApply">
+                        <span>Apply now</span>
+                    </button>
+                    <button is="emby-button" type="button" class="raised" id="tmRefresh">
+                        <span>Reload catalog</span>
+                    </button>
+                    <button is="emby-button" type="button" class="raised" id="tmPreviewCss">
+                        <span>View CSS</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tmSection">
+                <h2>Themes</h2>
+                <p class="tmHint">
+                    Pick one theme. Installing downloads a copy into the plugin's data folder, so the
+                    server keeps working even if the theme's host goes away.
+                </p>
+                <div class="inputContainer tmSearch">
+                    <input is="emby-input" type="search" id="tmSearch" label="Filter" placeholder="Name, author or tag" />
+                </div>
+                <div class="tmGrid" id="tmThemeGrid"></div>
+            </div>
+
+            <div class="tmSection">
+                <h2>Add-ons</h2>
+                <p class="tmHint">
+                    Optional tweaks stacked on top of the active theme, in the order you enable them.
+                    Some belong to a specific theme and will pull it in when installed.
+                </p>
+                <div class="tmGrid" id="tmAddonGrid"></div>
+            </div>
+
+            <div class="tmSection">
+                <h2>Add a stylesheet</h2>
+                <p class="tmHint">
+                    <strong>Download</strong> stores a copy on the server and rewrites relative image and
+                    font URLs so they keep resolving. <strong>Link</strong> leaves the stylesheet where it
+                    is and adds an <code>@import</code>, so viewers fetch it from the original host and
+                    always get the newest version.
+                </p>
+                <div class="tmInline">
+                    <div class="inputContainer" style="flex:1 1 12em;">
+                        <input is="emby-input" type="text" id="tmNewName" label="Name (optional)" />
+                    </div>
+                    <div class="inputContainer" style="flex:2 1 20em;">
+                        <input is="emby-input" type="url" id="tmNewUrl" label="Stylesheet URL"
+                               placeholder="https://example.com/theme.css" />
+                    </div>
+                    <div class="selectContainer" style="flex:0 1 10em;">
+                        <select is="emby-select" id="tmNewKind" label="Type">
+                            <option value="Theme">Theme</option>
+                            <option value="Addon">Add-on</option>
+                        </select>
+                    </div>
+                    <button is="emby-button" type="button" class="raised" id="tmDownload"><span>Download</span></button>
+                    <button is="emby-button" type="button" class="raised" id="tmLink"><span>Link</span></button>
+                </div>
+            </div>
+
+            <div class="tmSection">
+                <h2>Linked stylesheets</h2>
+                <div id="tmLinkList"></div>
+            </div>
+
+            <div class="tmSection">
+                <h2>Branding</h2>
+                <p class="tmHint">
+                    Replace Jellyfin's images with your own. The logo is swapped with CSS, so it reaches
+                    any client that loads the branding stylesheet; the tab and app icons are static files
+                    and are swapped by the plugin as the browser asks for them.
+                </p>
+
+                <label class="checkboxContainer">
+                    <input is="emby-checkbox" type="checkbox" id="tmBrandingEnabled" />
+                    <span>Apply branding overrides</span>
+                </label>
+
+                <div class="tmAssets" style="margin:1em 0 1.4em;">
+                    <div class="tmAsset" data-kind="Logo">
+                        <h4>Logo</h4>
+                        <p class="tmAssetHint">Top bar, dashboard drawer and the logo on the loading screen.</p>
+                        <div class="tmPreview"><span>Not set</span></div>
+                        <input type="file" accept="image/*" style="display:none" />
+                        <button is="emby-button" type="button" class="raised tmUpload"><span>Upload</span></button>
+                        <button is="emby-button" type="button" class="raised tmClear"><span>Clear</span></button>
+                    </div>
+                    <div class="tmAsset" data-kind="Favicon">
+                        <h4>Browser tab icon</h4>
+                        <p class="tmAssetHint">PNG or ICO. Browsers cache this hard, so force reload after changing it.</p>
+                        <div class="tmPreview"><span>Not set</span></div>
+                        <input type="file" accept="image/png,image/x-icon,image/vnd.microsoft.icon,.ico" style="display:none" />
+                        <button is="emby-button" type="button" class="raised tmUpload"><span>Upload</span></button>
+                        <button is="emby-button" type="button" class="raised tmClear"><span>Clear</span></button>
+                    </div>
+                    <div class="tmAsset" data-kind="AppIcon">
+                        <h4>App icon</h4>
+                        <p class="tmAssetHint">Used when Jellyfin is installed to a home screen. A square PNG works best.</p>
+                        <div class="tmPreview"><span>Not set</span></div>
+                        <input type="file" accept="image/png" style="display:none" />
+                        <button is="emby-button" type="button" class="raised tmUpload"><span>Upload</span></button>
+                        <button is="emby-button" type="button" class="raised tmClear"><span>Clear</span></button>
+                    </div>
+                    <div class="tmAsset" data-kind="Splash">
+                        <h4>Splash screen</h4>
+                        <p class="tmAssetHint">The full bleed image behind the login page.</p>
+                        <div class="tmPreview"><span>Not set</span></div>
+                        <input type="file" accept="image/*" style="display:none" />
+                        <button is="emby-button" type="button" class="raised tmUpload"><span>Upload</span></button>
+                        <button is="emby-button" type="button" class="raised tmClear"><span>Clear</span></button>
+                    </div>
+                </div>
+
+                <div class="inputContainer" style="max-width:16em;">
+                    <input is="emby-input" type="text" id="tmLogoHeight" label="Logo height" placeholder="2.4em" />
+                </div>
+                <div class="inputContainer" style="max-width:16em;">
+                    <input is="emby-input" type="text" id="tmAccent" label="Accent colour (theme dependent)"
+                           placeholder="#00a4dc" />
+                    <div class="fieldDescription">
+                        Only read by themes that expose an accent variable, which of the catalog themes
+                        means Scyfin and Finimalism. Jellyfin's own themes write their colours as
+                        literals, so this does nothing on a stock install.
+                    </div>
+                </div>
+
+                <label class="checkboxContainer">
+                    <input is="emby-checkbox" type="checkbox" id="tmLogoLogin" />
+                    <span>Also use the logo on the loading and login screen</span>
+                </label>
+                <label class="checkboxContainer">
+                    <input is="emby-checkbox" type="checkbox" id="tmReplaceIcons" />
+                    <span>Serve the uploaded tab and app icons in place of Jellyfin's</span>
+                </label>
+                <label class="checkboxContainer">
+                    <input is="emby-checkbox" type="checkbox" id="tmSplashEnabled" />
+                    <span>Show the splash screen on the login page</span>
+                </label>
+            </div>
+
+            <div class="tmSection">
+                <h2>Custom CSS</h2>
+                <p class="tmHint">
+                    Added last, so it overrides everything above it. The server's own Custom CSS box in
+                    Dashboard &rarr; General is left untouched and still applies after this.
+                </p>
+                <div class="inputContainer">
+                    <textarea is="emby-textarea" id="tmCustomCss" rows="10" label="CSS"
+                              style="font-family:monospace;"></textarea>
+                </div>
+            </div>
+
+            <div class="tmSection">
+                <h2>Advanced</h2>
+                <label class="checkboxContainer">
+                    <input is="emby-checkbox" type="checkbox" id="tmApplyBranding" />
+                    <span>Publish to the server's branding CSS</span>
+                </label>
+                <div class="fieldDescription" style="margin:-.4em 0 1em 2.4em;">
+                    Turn this off to stop the plugin writing to the server configuration. The composed
+                    stylesheet stays available at <code>/ThemeManager/Css</code> if you would rather link it yourself.
+                </div>
+
+                <label class="checkboxContainer">
+                    <input is="emby-checkbox" type="checkbox" id="tmInlineImports" />
+                    <span>Inline imported stylesheets when downloading</span>
+                </label>
+                <div class="fieldDescription" style="margin:-.4em 0 1em 2.4em;">
+                    Several themes are just a list of <code>@import</code> lines pointing at a CDN. Inlining
+                    pulls those files in too, so the theme works for clients that cannot reach the CDN.
+                    Downloads take longer, and picking up upstream changes needs a re-download.
+                </div>
+
+                <div class="inputContainer">
+                    <input is="emby-input" type="url" id="tmCatalogUrl" label="Extra catalog URL" />
+                    <div class="fieldDescription">
+                        Optional. A JSON file in the same shape as the bundled catalog; entries are merged
+                        over the built-in list and matching ids replace them.
+                    </div>
+                </div>
+            </div>
+
+            <button is="emby-button" type="button" class="raised button-submit block" id="tmSave">
+                <span>Save</span>
+            </button>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            'use strict';
+
+            var page = document.querySelector('#themeManagerPage');
+            var state = null;
+            var loading = false;
+
+            function url(path) {
+                return ApiClient.getUrl('ThemeManager/' + path);
+            }
+
+            // getUrl might already have put a query string on the end.
+            function withQuery(address, query) {
+                return address + (address.indexOf('?') === -1 ? '?' : '&') + query;
+            }
+
+            function showLoading() {
+                if (window.Loading) { Loading.show(); }
+            }
+
+            function hideLoading() {
+                if (window.Loading) { Loading.hide(); }
+            }
+
+            function fail(err) {
+                hideLoading();
+                var fallback = 'Something went wrong.';
+
+                if (err && typeof err.text === 'function') {
+                    err.text().then(function (body) {
+                        var message = body || fallback;
+                        try {
+                            var parsed = JSON.parse(body);
+                            message = parsed.detail || parsed.title || message;
+                        } catch (ignored) { /* not a problem document */ }
+                        Dashboard.alert({ message: message });
+                    }).catch(function () {
+                        Dashboard.alert({ message: fallback });
+                    });
+                    return;
+                }
+
+                Dashboard.alert({ message: (err && err.message) || fallback });
+            }
+
+            function esc(value) {
+                return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+
+            function getJson(path) {
+                return ApiClient.ajax({ type: 'GET', url: url(path), dataType: 'json' });
+            }
+
+            function postJson(path, body) {
+                return ApiClient.ajax({
+                    type: 'POST',
+                    url: url(path),
+                    data: JSON.stringify(body),
+                    contentType: 'application/json'
+                });
+            }
+
+            function del(path) {
+                return ApiClient.ajax({ type: 'DELETE', url: url(path) });
+            }
+
+            function installedById(id) {
+                if (!state) { return null; }
+                for (var i = 0; i < state.Installed.length; i++) {
+                    if (state.Installed[i].Id === id) { return state.Installed[i]; }
+                }
+                return null;
+            }
+
+            // Catalog entries can come from a remote URL, so check anything that ends up in an
+            // href or a style attribute, escaping alone isn't enough there.
+            function safeHttpUrl(value) {
+                return /^https?:\/\/[^\s"'<>]+$/i.test(String(value || '')) ? value : null;
+            }
+
+            function safeColor(value) {
+                return /^#[0-9a-f]{3,8}$|^[a-z]{3,20}$/i.test(String(value || '')) ? value : null;
+            }
+
+            function swatchStyle(entry) {
+                var preview = safeHttpUrl(entry.PreviewImage);
+                if (preview) {
+                    return 'background-image:url(&quot;' + esc(preview) + '&quot;)';
+                }
+
+                var colors = (entry.Swatch || []).map(safeColor).filter(Boolean);
+                if (colors.length < 2) {
+                    colors = ['#2a2a2a', '#3a3a3a', '#00a4dc'];
+                }
+
+                return 'background:linear-gradient(135deg,' + colors.join(',') + ')';
+            }
+
+            function card(entry, isAddon) {
+                var installed = installedById(entry.Id);
+                var active = isAddon
+                    ? state.EnabledAddonIds.indexOf(entry.Id) !== -1
+                    : state.ActiveThemeId === entry.Id;
+
+                var html = '<div class="tmCard' + (active ? ' is-active' : '') + '" data-id="' + esc(entry.Id) + '">';
+                html += '<div class="tmSwatch" style="' + swatchStyle(entry) + '"></div>';
+                html += '<div class="tmCardBody">';
+                html += '<h3>' + esc(entry.Name)
+                    + (active ? '<span class="tmBadge">' + (isAddon ? 'On' : 'Active') + '</span>' : '') + '</h3>';
+                html += '<div class="tmMeta">' + (entry.Author ? 'by ' + esc(entry.Author) : 'Unknown author');
+                if (entry.License) { html += ' &middot; ' + esc(entry.License); }
+                html += '</div>';
+                if (entry.Description) { html += '<p class="tmDesc">' + esc(entry.Description) + '</p>'; }
+                if (entry.Tags && entry.Tags.length) {
+                    html += '<div class="tmTags">';
+                    entry.Tags.forEach(function (tag) { html += '<span class="tmTag">' + esc(tag) + '</span>'; });
+                    html += '</div>';
+                }
+                html += '</div><div class="tmCardActions">';
+
+                if (!installed) {
+                    html += '<button is="emby-button" type="button" class="raised tmInstall"><span>Install</span></button>';
+                } else {
+                    if (isAddon) {
+                        html += '<button is="emby-button" type="button" class="raised tmToggle"><span>'
+                            + (active ? 'Disable' : 'Enable') + '</span></button>';
+                    } else if (!active) {
+                        html += '<button is="emby-button" type="button" class="raised tmActivate"><span>Apply</span></button>';
+                    }
+                    html += '<button is="emby-button" type="button" class="raised tmUpdate"><span>Update</span></button>';
+                    html += '<button is="emby-button" type="button" class="raised tmRemove"><span>Remove</span></button>';
+                }
+
+                var homepage = safeHttpUrl(entry.Homepage);
+                if (homepage) {
+                    html += '<a is="emby-linkbutton" class="raised emby-button" href="' + esc(homepage)
+                        + '" target="_blank" rel="noopener noreferrer"><span>Source</span></a>';
+                }
+
+                html += '</div></div>';
+                return html;
+            }
+
+            function matchesFilter(entry, needle) {
+                if (!needle) { return true; }
+                var haystack = [entry.Name, entry.Author, entry.Description, entry.Family]
+                    .concat(entry.Tags || []).join(' ').toLowerCase();
+                return haystack.indexOf(needle) !== -1;
+            }
+
+            function renderCatalog() {
+                var needle = page.querySelector('#tmSearch').value.trim().toLowerCase();
+
+                // Stylesheets added by URL aren't in the catalog but still need a card.
+                var known = {};
+                state.Catalog.forEach(function (entry) { known[entry.Id] = true; });
+
+                var extra = state.Installed
+                    .filter(function (theme) { return !known[theme.Id]; })
+                    .map(function (theme) {
+                        return {
+                            Id: theme.Id,
+                            Name: theme.Name,
+                            Author: theme.Author,
+                            Kind: theme.Kind,
+                            Description: 'Added from ' + theme.SourceUrl,
+                            Homepage: theme.Homepage,
+                            Tags: ['custom'],
+                            Swatch: []
+                        };
+                    });
+
+                var all = state.Catalog.concat(extra);
+                var themes = all.filter(function (e) { return e.Kind !== 'Addon' && matchesFilter(e, needle); });
+                var addons = all.filter(function (e) { return e.Kind === 'Addon' && matchesFilter(e, needle); });
+
+                page.querySelector('#tmThemeGrid').innerHTML = themes.length
+                    ? themes.map(function (e) { return card(e, false); }).join('')
+                    : '<p class="tmEmpty">Nothing matches that filter.</p>';
+
+                page.querySelector('#tmAddonGrid').innerHTML = addons.length
+                    ? addons.map(function (e) { return card(e, true); }).join('')
+                    : '<p class="tmEmpty">Nothing matches that filter.</p>';
+            }
+
+            function renderLinks() {
+                var host = page.querySelector('#tmLinkList');
+                if (!state.Links.length) {
+                    host.innerHTML = '<p class="tmEmpty">No linked stylesheets.</p>';
+                    return;
+                }
+
+                host.innerHTML = state.Links.map(function (link, index) {
+                    return '<div class="tmRow" data-index="' + index + '">'
+                        + '<label class="checkboxContainer" style="margin:0;">'
+                        + '<input is="emby-checkbox" type="checkbox" class="tmLinkEnabled"'
+                        + (link.Enabled ? ' checked' : '') + ' /><span></span></label>'
+                        + '<div class="tmRowMain"><div>' + esc(link.Name) + '</div>'
+                        + '<code>' + esc(link.Url) + '</code></div>'
+                        + '<button is="emby-button" type="button" class="raised tmLinkRemove"><span>Remove</span></button>'
+                        + '</div>';
+                }).join('');
+            }
+
+            function renderBranding() {
+                var branding = state.Branding || {};
+
+                page.querySelector('#tmBrandingEnabled').checked = !!branding.Enabled;
+                page.querySelector('#tmLogoHeight').value = branding.LogoMaxHeight || '';
+                page.querySelector('#tmAccent').value = branding.AccentColor || '';
+                page.querySelector('#tmLogoLogin').checked = !!branding.ApplyLogoToLogin;
+                page.querySelector('#tmReplaceIcons').checked = !!branding.ReplaceWebIcons;
+                page.querySelector('#tmSplashEnabled').checked = !!branding.SplashEnabled;
+
+                var files = {
+                    Logo: branding.LogoFile,
+                    Favicon: branding.FaviconFile,
+                    AppIcon: branding.AppIconFile,
+                    Splash: branding.SplashFile
+                };
+
+                Array.prototype.forEach.call(page.querySelectorAll('.tmAsset'), function (node) {
+                    var kind = node.getAttribute('data-kind');
+                    var preview = node.querySelector('.tmPreview');
+
+                    if (files[kind]) {
+                        var src = withQuery(url('Asset/' + kind.toLowerCase()), 'v=' + (branding.AssetRevision || 1));
+                        preview.innerHTML = '<img alt="' + esc(kind) + '" src="' + esc(src) + '" />';
+                    } else {
+                        preview.innerHTML = '<span>Not set</span>';
+                    }
+                });
+            }
+
+            function renderStatus() {
+                var theme = state.ActiveThemeId ? installedById(state.ActiveThemeId) : null;
+                var addonCount = state.EnabledAddonIds.length;
+                var linkCount = state.Links.filter(function (l) { return l.Enabled; }).length;
+
+                page.querySelector('#tmActiveName').textContent = theme ? theme.Name : 'No theme applied';
+
+                var parts = [];
+                if (addonCount) { parts.push(addonCount + ' add-on' + (addonCount === 1 ? '' : 's')); }
+                if (linkCount) { parts.push(linkCount + ' linked stylesheet' + (linkCount === 1 ? '' : 's')); }
+                if (!state.ApplyToServerBranding) { parts.push('not published to branding CSS'); }
+                parts.push(state.LastAppliedAt
+                    ? 'last applied ' + new Date(state.LastAppliedAt).toLocaleString()
+                    : 'never applied');
+
+                page.querySelector('#tmActiveSub').textContent = parts.join(' · ');
+            }
+
+            function render() {
+                renderStatus();
+                renderCatalog();
+                renderLinks();
+                renderBranding();
+            }
+
+            function load(refresh) {
+                if (loading) { return Promise.resolve(); }
+                loading = true;
+                showLoading();
+
+                return getJson('State' + (refresh ? '?refresh=true' : '')).then(function (result) {
+                    state = result;
+                    state.Installed = state.Installed || [];
+                    state.Links = state.Links || [];
+                    state.EnabledAddonIds = state.EnabledAddonIds || [];
+                    state.Catalog = state.Catalog || [];
+
+                    page.querySelector('#tmCustomCss').value = state.CustomCss || '';
+                    page.querySelector('#tmApplyBranding').checked = !!state.ApplyToServerBranding;
+                    page.querySelector('#tmInlineImports').checked = !!state.InlineImportsOnInstall;
+                    page.querySelector('#tmCatalogUrl').value = state.CatalogUrl || '';
+
+                    render();
+                    hideLoading();
+                    loading = false;
+                }).catch(function (err) {
+                    loading = false;
+                    fail(err);
+                });
+            }
+
+            function collectSettings() {
+                return {
+                    ActiveThemeId: state.ActiveThemeId,
+                    EnabledAddonIds: state.EnabledAddonIds,
+                    Links: state.Links,
+                    CustomCss: page.querySelector('#tmCustomCss').value,
+                    ApplyToServerBranding: page.querySelector('#tmApplyBranding').checked,
+                    InlineImportsOnInstall: page.querySelector('#tmInlineImports').checked,
+                    CatalogUrl: page.querySelector('#tmCatalogUrl').value,
+                    Branding: {
+                        Enabled: page.querySelector('#tmBrandingEnabled').checked,
+                        LogoMaxHeight: page.querySelector('#tmLogoHeight').value || '2.4em',
+                        AccentColor: page.querySelector('#tmAccent').value,
+                        ApplyLogoToLogin: page.querySelector('#tmLogoLogin').checked,
+                        ReplaceWebIcons: page.querySelector('#tmReplaceIcons').checked,
+                        SplashEnabled: page.querySelector('#tmSplashEnabled').checked
+                    }
+                };
+            }
+
+            function save(quiet) {
+                showLoading();
+                return postJson('Settings', collectSettings()).then(function () {
+                    return load();
+                }).then(function () {
+                    hideLoading();
+                    if (!quiet) { Dashboard.processPluginConfigurationUpdateResult(); }
+                }).catch(fail);
+            }
+
+            page.addEventListener('click', function (event) {
+                if (!state || !event.target.closest) { return; }
+
+                var cardNode = event.target.closest('.tmCard');
+                var button = event.target.closest('button');
+                if (!cardNode || !button) { return; }
+
+                var id = cardNode.getAttribute('data-id');
+
+                if (button.classList.contains('tmInstall')) {
+                    showLoading();
+                    postJson('Install', { Id: id })
+                        .then(function () { return load(); })
+                        .then(hideLoading)
+                        .catch(fail);
+                } else if (button.classList.contains('tmActivate')) {
+                    state.ActiveThemeId = id;
+                    save(true);
+                } else if (button.classList.contains('tmToggle')) {
+                    var at = state.EnabledAddonIds.indexOf(id);
+                    if (at === -1) {
+                        state.EnabledAddonIds.push(id);
+                    } else {
+                        state.EnabledAddonIds.splice(at, 1);
+                    }
+                    save(true);
+                } else if (button.classList.contains('tmUpdate')) {
+                    showLoading();
+                    postJson('Themes/' + encodeURIComponent(id) + '/Update')
+                        .then(function () { return load(); })
+                        .then(hideLoading)
+                        .catch(fail);
+                } else if (button.classList.contains('tmRemove')) {
+                    showLoading();
+                    del('Themes/' + encodeURIComponent(id))
+                        .then(function () { return load(); })
+                        .then(hideLoading)
+                        .catch(fail);
+                }
+            });
+
+            page.querySelector('#tmSearch').addEventListener('input', function () {
+                if (state) { renderCatalog(); }
+            });
+
+            page.querySelector('#tmLinkList').addEventListener('click', function (event) {
+                if (!event.target.closest) { return; }
+
+                var row = event.target.closest('.tmRow');
+                if (row && event.target.closest('.tmLinkRemove')) {
+                    state.Links.splice(parseInt(row.getAttribute('data-index'), 10), 1);
+                    renderLinks();
+                    renderStatus();
+                }
+            });
+
+            page.querySelector('#tmLinkList').addEventListener('change', function (event) {
+                if (!event.target.closest || !event.target.classList.contains('tmLinkEnabled')) { return; }
+
+                var row = event.target.closest('.tmRow');
+                if (row) {
+                    state.Links[parseInt(row.getAttribute('data-index'), 10)].Enabled = event.target.checked;
+                    renderStatus();
+                }
+            });
+
+            page.querySelector('#tmDownload').addEventListener('click', function () {
+                var body = {
+                    Name: page.querySelector('#tmNewName').value,
+                    Url: page.querySelector('#tmNewUrl').value,
+                    Kind: page.querySelector('#tmNewKind').value
+                };
+
+                if (!body.Url) {
+                    Dashboard.alert({ message: 'Enter a stylesheet URL first.' });
+                    return;
+                }
+
+                showLoading();
+                postJson('InstallUrl', body).then(function () {
+                    page.querySelector('#tmNewName').value = '';
+                    page.querySelector('#tmNewUrl').value = '';
+                    return load();
+                }).then(hideLoading).catch(fail);
+            });
+
+            page.querySelector('#tmLink').addEventListener('click', function () {
+                var linkUrl = page.querySelector('#tmNewUrl').value.trim();
+                if (!linkUrl) {
+                    Dashboard.alert({ message: 'Enter a stylesheet URL first.' });
+                    return;
+                }
+
+                state.Links.push({
+                    Id: '',
+                    Name: page.querySelector('#tmNewName').value.trim() || linkUrl,
+                    Url: linkUrl,
+                    Enabled: true
+                });
+
+                page.querySelector('#tmNewName').value = '';
+                page.querySelector('#tmNewUrl').value = '';
+                save(true);
+            });
+
+            page.querySelector('#tmApply').addEventListener('click', function () {
+                showLoading();
+                postJson('Apply', {})
+                    .then(function () { return load(); })
+                    .then(function () {
+                        hideLoading();
+                        Dashboard.alert({ message: 'Stylesheet published. Reload your clients to see it.' });
+                    })
+                    .catch(fail);
+            });
+
+            page.querySelector('#tmRefresh').addEventListener('click', function () { load(true); });
+
+            page.querySelector('#tmPreviewCss').addEventListener('click', function () {
+                window.open(url('Css'), '_blank', 'noopener');
+            });
+
+            page.querySelector('#tmSave').addEventListener('click', function () { save(false); });
+
+            Array.prototype.forEach.call(page.querySelectorAll('.tmAsset'), function (node) {
+                var kind = node.getAttribute('data-kind');
+                var input = node.querySelector('input[type=file]');
+
+                node.querySelector('.tmUpload').addEventListener('click', function () { input.click(); });
+
+                input.addEventListener('change', function () {
+                    var file = input.files && input.files[0];
+                    if (!file) { return; }
+
+                    showLoading();
+                    fetch(url('Asset/' + kind.toLowerCase()), {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'MediaBrowser Token="' + ApiClient.accessToken() + '"',
+                            'Content-Type': file.type || 'application/octet-stream'
+                        },
+                        body: file
+                    }).then(function (response) {
+                        input.value = '';
+                        if (!response.ok) { throw response; }
+                        return load();
+                    }).then(hideLoading).catch(fail);
+                });
+
+                node.querySelector('.tmClear').addEventListener('click', function () {
+                    showLoading();
+                    del('Asset/' + kind.toLowerCase())
+                        .then(function () { return load(); })
+                        .then(hideLoading)
+                        .catch(fail);
+                });
+            });
+
+            page.addEventListener('viewshow', function () { load(); });
+
+            // Some navigation paths run this before viewshow fires, so load once here too.
+            // The loading flag stops the two racing.
+            load();
+        })();
+    </script>
+</div>
+</body>
+</html>
