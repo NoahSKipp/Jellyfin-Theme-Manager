@@ -1,0 +1,16 @@
+---
+name: "Theme Manager"
+guid: "0c47f62a-8d40-4ec2-84e0-a305f01da83d"
+version: "1.0.0.0"
+targetAbi: "10.11.0.0"
+framework: "net9.0"
+owner: "NoahSKipp"
+category: "General"
+overview: "Install community CSS themes and rebrand your Jellyfin server."
+description: >
+  Browse a bundled catalog of community CSS themes, download them to the server, or link any
+  stylesheet by URL. Stack optional add-ons on top of a theme, add your own CSS, and replace the
+  logo, browser tab icon, app icon and splash screen. Everything is composed into one stylesheet
+  and published through the server's branding CSS.
+artifacts:
+  - "Jellyfin.Plugin.ThemeManager.dll"

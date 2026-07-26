@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, for example 1.0.0.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          # Jellyfin wants four part version numbers.
+          case "$VERSION" in
+            *.*.*.*) ;;
+            *.*.*) VERSION="$VERSION.0" ;;
+            *) echo "::error::'$VERSION' is not a version number" && exit 1 ;;
+          esac
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Make sure PyYAML is around
+        run: python3 -c "import yaml" || pip install --break-system-packages --quiet pyyaml
+
+      - name: Test
+        run: dotnet test --configuration Release
+
+      - name: Publish
+        run: |
+          dotnet publish Jellyfin.Plugin.ThemeManager/Jellyfin.Plugin.ThemeManager.csproj \
+            --configuration Release \
+            --output ./publish \
+            -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Package
+        id: package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p artifacts/plugin
+          cp ./publish/Jellyfin.Plugin.ThemeManager.dll artifacts/plugin/
+
+          python3 - <<'PY'
+          import json, os, datetime, yaml
+
+          with open('build.yaml') as handle:
+              build = yaml.safe_load(handle)
+
+          meta = {
+              'category': build['category'],
+              'changelog': '',
+              'description': ' '.join(build['description'].split()),
+              'guid': build['guid'],
+              'name': build['name'],
+              'overview': build['overview'],
+              'owner': build['owner'],
+              'targetAbi': build['targetAbi'],
+              'timestamp': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+              'version': os.environ['VERSION'],
+          }
+
+          with open('artifacts/plugin/meta.json', 'w') as handle:
+              json.dump(meta, handle, indent=4)
+          PY
+
+          cd artifacts/plugin
+          zip -r "../theme-manager_${VERSION}.zip" .
+          cd ../..
+
+          echo "checksum=$(md5sum "artifacts/theme-manager_${VERSION}.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      # Release first, so the download URL is live by the time the manifest points at it.
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          files: artifacts/theme-manager_${{ steps.version.outputs.version }}.zip
+          generate_release_notes: true
+
+      - name: Update repository manifest
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          CHECKSUM: ${{ steps.package.outputs.checksum }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime, yaml
+
+          version = os.environ['VERSION']
+
+          with open('build.yaml') as handle:
+              build = yaml.safe_load(handle)
+
+          with open('manifest.json') as handle:
+              manifest = json.load(handle)
+
+          entry = manifest[0]
+          entry['versions'] = [v for v in entry['versions'] if v['version'] != version]
+          entry['versions'].insert(0, {
+              'version': version,
+              'changelog': f"See https://github.com/{os.environ['REPO']}/releases/tag/v{version}",
+              'targetAbi': build['targetAbi'],
+              'sourceUrl': (
+                  f"https://github.com/{os.environ['REPO']}/releases/download/"
+                  f"v{version}/theme-manager_{version}.zip"
+              ),
+              'checksum': os.environ['CHECKSUM'],
+              'timestamp': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+          })
+
+          with open('manifest.json', 'w') as handle:
+              json.dump(manifest, handle, indent=4)
+              handle.write('\n')
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          git commit -m "Add ${VERSION} to the plugin manifest" || echo "manifest already current"
+          git push
