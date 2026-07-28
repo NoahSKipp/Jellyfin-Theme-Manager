@@ -7,6 +7,15 @@
         "owner": "NoahSKipp",
         "category": "General",
         "imageUrl": "",
-        "versions": []
+        "versions": [
+            {
+                "version": "1.0.0.0",
+                "changelog": "See https://github.com/NoahSKipp/Jellyfin-Theme-Manager/releases/tag/v1.0.0.0",
+                "targetAbi": "10.11.0.0",
+                "sourceUrl": "https://github.com/NoahSKipp/Jellyfin-Theme-Manager/releases/download/v1.0.0.0/theme-manager_1.0.0.0.zip",
+                "checksum": "88901f2ff4c7cdef52dddcf7b193c9a5",
+                "timestamp": "2026-07-28T20:11:18Z"
+            }
+        ]
     }
 ]
