@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using Jellyfin.Plugin.ThemeManager.Models;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.Branding;
@@ -45,6 +46,9 @@ public partial class CssPublisher
         var config = Plugin.Configuration;
         var blocks = new List<(string Label, string Css)>();
 
+        // The active theme comes from exactly one of two places: an installed theme by id, or a
+        // Theme-kind link by id. Settings save keeps these mutually exclusive, so whichever one
+        // is set here is trusted as the only one.
         if (!string.IsNullOrWhiteSpace(config.ActiveThemeId))
         {
             var theme = ThemeInstaller.Find(config.ActiveThemeId);
@@ -55,6 +59,19 @@ public partial class CssPublisher
             else
             {
                 _logger.LogWarning("Active theme {Theme} is no longer installed", config.ActiveThemeId);
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(config.ActiveLinkId))
+        {
+            var themeLink = config.LinkedStylesheets
+                .FirstOrDefault(l => l.Id == config.ActiveLinkId && l.Kind == ThemeKind.Theme);
+            if (themeLink is not null)
+            {
+                blocks.Add(($"linked theme: {themeLink.Name}", $"@import url(\"{EscapeUrl(themeLink.Url)}\");"));
+            }
+            else
+            {
+                _logger.LogWarning("Active linked theme {Link} is no longer in the list", config.ActiveLinkId);
             }
         }
 
@@ -68,19 +85,21 @@ public partial class CssPublisher
             }
         }
 
-        var links = config.LinkedStylesheets
-            .Where(l => l.Enabled && !string.IsNullOrWhiteSpace(l.Url))
+        // Theme-kind links are handled above, only Addon-kind links stack here. Unlike installed
+        // add-ons these aren't individually orderable against each other, just all-or-nothing.
+        var addonLinks = config.LinkedStylesheets
+            .Where(l => l.Kind == ThemeKind.Addon && l.Enabled && !string.IsNullOrWhiteSpace(l.Url))
             .ToArray();
-        if (links.Length > 0)
+        if (addonLinks.Length > 0)
         {
             var linkCss = new StringBuilder();
-            foreach (var link in links)
+            foreach (var link in addonLinks)
             {
                 // Left as a real @import so the browser fetches it and picks up upstream changes.
                 linkCss.Append("@import url(\"").Append(EscapeUrl(link.Url)).AppendLine("\");");
             }
 
-            blocks.Add(("linked stylesheets", linkCss.ToString()));
+            blocks.Add(("linked add-ons", linkCss.ToString()));
         }
 
         var branding = BrandingCssBuilder.Build(config.Branding);

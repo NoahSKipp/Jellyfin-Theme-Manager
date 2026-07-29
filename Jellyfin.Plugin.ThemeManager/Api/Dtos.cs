@@ -12,6 +12,8 @@ public class ThemeManagerState
 
     public string? ActiveThemeId { get; set; }
 
+    public string? ActiveLinkId { get; set; }
+
     public string[] EnabledAddonIds { get; set; } = Array.Empty<string>();
 
     public LinkedStylesheet[] Links { get; set; } = Array.Empty<LinkedStylesheet>();
@@ -46,6 +48,8 @@ public class InstallUrlRequest
 public class SettingsRequest
 {
     public string? ActiveThemeId { get; set; }
+
+    public string? ActiveLinkId { get; set; }
 
     public string[]? EnabledAddonIds { get; set; }
 

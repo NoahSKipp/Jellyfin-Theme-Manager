@@ -9,7 +9,11 @@ namespace Jellyfin.Plugin.ThemeManager.Configuration;
 /// </summary>
 public class PluginConfiguration : BasePluginConfiguration
 {
+    // Exactly one of ActiveThemeId (an installed theme) and ActiveLinkId (a Theme-kind
+    // linked stylesheet) is ever set, never both. Settings save enforces that.
     public string? ActiveThemeId { get; set; }
+
+    public string? ActiveLinkId { get; set; }
 
     public string[] EnabledAddonIds { get; set; } = Array.Empty<string>();
 

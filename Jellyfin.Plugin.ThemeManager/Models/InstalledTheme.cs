@@ -44,5 +44,10 @@ public class LinkedStylesheet
 
     public string Url { get; set; } = string.Empty;
 
+    public ThemeKind Kind { get; set; } = ThemeKind.Theme;
+
+    // Only meaningful for Addon-kind links, addons stack freely. A Theme-kind link's
+    // inclusion is decided by ActiveLinkId instead, exactly one theme wins regardless
+    // of whether it came from an install or a link.
     public bool Enabled { get; set; } = true;
 }

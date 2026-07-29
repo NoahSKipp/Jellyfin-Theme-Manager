@@ -55,6 +55,7 @@ public class ThemeManagerController : ControllerBase
             Catalog = catalog.Themes,
             Installed = config.InstalledThemes,
             ActiveThemeId = config.ActiveThemeId,
+            ActiveLinkId = config.ActiveLinkId,
             EnabledAddonIds = config.EnabledAddonIds,
             Links = config.LinkedStylesheets,
             CustomCss = config.CustomCss,
@@ -146,9 +147,6 @@ public class ThemeManagerController : ControllerBase
         // an empty stylesheet later.
         var installedIds = config.InstalledThemes.Select(s => s.Id).ToHashSet(StringComparer.Ordinal);
 
-        config.ActiveThemeId = !string.IsNullOrWhiteSpace(request.ActiveThemeId) && installedIds.Contains(request.ActiveThemeId)
-            ? request.ActiveThemeId
-            : null;
         config.EnabledAddonIds = (request.EnabledAddonIds ?? Array.Empty<string>())
             .Where(installedIds.Contains)
             .Distinct(StringComparer.Ordinal)
@@ -161,9 +159,21 @@ public class ThemeManagerController : ControllerBase
                 Id = string.IsNullOrWhiteSpace(l.Id) ? Guid.NewGuid().ToString("N") : l.Id,
                 Name = string.IsNullOrWhiteSpace(l.Name) ? l.Url : l.Name,
                 Url = l.Url.Trim(),
+                Kind = l.Kind,
                 Enabled = l.Enabled
             })
             .ToArray();
+
+        var themeLinkIds = config.LinkedStylesheets
+            .Where(l => l.Kind == ThemeKind.Theme)
+            .Select(l => l.Id)
+            .ToHashSet(StringComparer.Ordinal);
+
+        (config.ActiveThemeId, config.ActiveLinkId) = ResolveActiveTheme(
+            request.ActiveThemeId,
+            request.ActiveLinkId,
+            installedIds,
+            themeLinkIds);
 
         config.CustomCss = request.CustomCss ?? string.Empty;
         config.ApplyToServerBranding = request.ApplyToServerBranding;
@@ -278,5 +288,27 @@ public class ThemeManagerController : ControllerBase
         _assets.Clear(parsed);
         _publisher.Publish();
         return NoContent();
+    }
+
+    // At most one active theme regardless of where it came from. Both being valid at once
+    // shouldn't happen from the page, it clears one when you apply the other, but an installed
+    // theme wins the tie if it ever does.
+    internal static (string? ThemeId, string? LinkId) ResolveActiveTheme(
+        string? requestedThemeId,
+        string? requestedLinkId,
+        IReadOnlySet<string> installedIds,
+        IReadOnlySet<string> themeLinkIds)
+    {
+        if (!string.IsNullOrWhiteSpace(requestedThemeId) && installedIds.Contains(requestedThemeId))
+        {
+            return (requestedThemeId, null);
+        }
+
+        if (!string.IsNullOrWhiteSpace(requestedLinkId) && themeLinkIds.Contains(requestedLinkId))
+        {
+            return (null, requestedLinkId);
+        }
+
+        return (null, null);
     }
 }

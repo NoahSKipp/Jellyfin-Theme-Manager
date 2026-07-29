@@ -129,7 +129,8 @@
                     <strong>Download</strong> stores a copy on the server and rewrites relative image and
                     font URLs so they keep resolving. <strong>Link</strong> leaves the stylesheet where it
                     is and adds an <code>@import</code>, so viewers fetch it from the original host and
-                    always get the newest version.
+                    always get the newest version. <strong>Type</strong> applies either way: a Theme
+                    replaces whatever else is active, an Add-on stacks alongside it.
                 </p>
                 <div class="tmInline">
                     <div class="inputContainer" style="flex:1 1 12em;">
@@ -475,11 +476,23 @@
                 }
 
                 host.innerHTML = state.Links.map(function (link, index) {
+                    var isTheme = link.Kind !== 'Addon';
+                    var isActive = isTheme && link.Id === state.ActiveLinkId;
+
+                    // Theme-kind links are exclusive, like the catalog theme cards, so they get
+                    // an Apply/Active control instead of the addon checkbox.
+                    var toggle = isTheme
+                        ? (isActive
+                            ? '<span class="tmBadge">Active</span>'
+                            : '<button is="emby-button" type="button" class="raised tmLinkActivate"><span>Apply</span></button>')
+                        : '<label class="checkboxContainer" style="margin:0;">'
+                            + '<input is="emby-checkbox" type="checkbox" class="tmLinkEnabled"'
+                            + (link.Enabled ? ' checked' : '') + ' /><span></span></label>';
+
                     return '<div class="tmRow" data-index="' + index + '">'
-                        + '<label class="checkboxContainer" style="margin:0;">'
-                        + '<input is="emby-checkbox" type="checkbox" class="tmLinkEnabled"'
-                        + (link.Enabled ? ' checked' : '') + ' /><span></span></label>'
-                        + '<div class="tmRowMain"><div>' + esc(link.Name) + '</div>'
+                        + toggle
+                        + '<div class="tmRowMain"><div>' + esc(link.Name)
+                        + '<span class="tmTag" style="margin-left:.5em;">' + (isTheme ? 'theme' : 'add-on') + '</span></div>'
                         + '<code>' + esc(link.Url) + '</code></div>'
                         + '<button is="emby-button" type="button" class="raised tmLinkRemove"><span>Remove</span></button>'
                         + '</div>';
@@ -518,14 +531,19 @@
 
             function renderStatus() {
                 var theme = state.ActiveThemeId ? installedById(state.ActiveThemeId) : null;
+                var linkedTheme = !theme && state.ActiveLinkId
+                    ? state.Links.filter(function (l) { return l.Id === state.ActiveLinkId; })[0]
+                    : null;
                 var addonCount = state.EnabledAddonIds.length;
-                var linkCount = state.Links.filter(function (l) { return l.Enabled; }).length;
+                var linkAddonCount = state.Links.filter(function (l) { return l.Kind === 'Addon' && l.Enabled; }).length;
 
-                page.querySelector('#tmActiveName').textContent = theme ? theme.Name : 'No theme applied';
+                page.querySelector('#tmActiveName').textContent = theme ? theme.Name
+                    : linkedTheme ? linkedTheme.Name
+                    : 'No theme applied';
 
                 var parts = [];
                 if (addonCount) { parts.push(addonCount + ' add-on' + (addonCount === 1 ? '' : 's')); }
-                if (linkCount) { parts.push(linkCount + ' linked stylesheet' + (linkCount === 1 ? '' : 's')); }
+                if (linkAddonCount) { parts.push(linkAddonCount + ' linked add-on' + (linkAddonCount === 1 ? '' : 's')); }
                 if (!state.ApplyToServerBranding) { parts.push('not published to branding CSS'); }
                 parts.push(state.LastAppliedAt
                     ? 'last applied ' + new Date(state.LastAppliedAt).toLocaleString()
@@ -570,6 +588,7 @@
             function collectSettings() {
                 return {
                     ActiveThemeId: state.ActiveThemeId,
+                    ActiveLinkId: state.ActiveLinkId,
                     EnabledAddonIds: state.EnabledAddonIds,
                     Links: state.Links,
                     CustomCss: page.querySelector('#tmCustomCss').value,
@@ -614,6 +633,7 @@
                         .catch(fail);
                 } else if (button.classList.contains('tmActivate')) {
                     state.ActiveThemeId = id;
+                    state.ActiveLinkId = null;
                     save(true);
                 } else if (button.classList.contains('tmToggle')) {
                     var at = state.EnabledAddonIds.indexOf(id);
@@ -646,10 +666,22 @@
                 if (!event.target.closest) { return; }
 
                 var row = event.target.closest('.tmRow');
-                if (row && event.target.closest('.tmLinkRemove')) {
-                    state.Links.splice(parseInt(row.getAttribute('data-index'), 10), 1);
+                if (!row) { return; }
+
+                var index = parseInt(row.getAttribute('data-index'), 10);
+
+                if (event.target.closest('.tmLinkRemove')) {
+                    var removed = state.Links[index];
+                    state.Links.splice(index, 1);
+                    if (removed && removed.Id === state.ActiveLinkId) {
+                        state.ActiveLinkId = null;
+                    }
                     renderLinks();
                     renderStatus();
+                } else if (event.target.closest('.tmLinkActivate')) {
+                    state.ActiveLinkId = state.Links[index].Id;
+                    state.ActiveThemeId = null;
+                    save(true);
                 }
             });
 
@@ -694,6 +726,7 @@
                     Id: '',
                     Name: page.querySelector('#tmNewName').value.trim() || linkUrl,
                     Url: linkUrl,
+                    Kind: page.querySelector('#tmNewKind').value,
                     Enabled: true
                 });
 

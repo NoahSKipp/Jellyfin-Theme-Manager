@@ -14,7 +14,8 @@ Built for **Jellyfin 10.11** (`net9.0`).
   rewrites relative image and font URLs to absolute ones, so the theme keeps working when it is
   served from your server instead of the CDN it was written for.
 - **Link any stylesheet.** Paste a URL to add it as an `@import` instead. Viewers fetch it from the
-  original host and always get the current version.
+  original host and always get the current version. Same Theme/Add-on choice as a download: a
+  linked theme replaces whatever else is active, a linked add-on just stacks alongside it.
 - **Stackable add-ons.** Pick one theme, then layer optional tweaks on top of it: rounded corners,
   OLED blacks, hover effects, a TV layout. Add-ons that need a particular base theme pull it in
   automatically.
