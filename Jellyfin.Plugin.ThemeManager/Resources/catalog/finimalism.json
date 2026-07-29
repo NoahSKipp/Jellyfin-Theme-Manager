@@ -1,0 +1,21 @@
+{
+  "id": "finimalism",
+  "name": "Finimalism",
+  "author": "tedhinklater",
+  "description": "Minimal, typography-led theme with generous spacing. Built for Jellyfin 10.10 and newer.",
+  "homepage": "https://github.com/tedhinklater/finimalism",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/tedhinklater/finimalism@main/Finimalism12.css",
+  "kind": "Theme",
+  "family": "Finimalism",
+  "tags": [
+    "dark",
+    "minimal",
+    "typography"
+  ],
+  "swatch": [
+    "#000000",
+    "#1c1c1e",
+    "#e5e5e7"
+  ]
+}

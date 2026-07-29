@@ -38,7 +38,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Configuration\configPage.html" />
-    <EmbeddedResource Include="Resources\themes.json" />
+    <EmbeddedResource Include="Resources\catalog\**\*.json" />
   </ItemGroup>
 
 </Project>

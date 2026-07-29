@@ -8,15 +8,28 @@ namespace Jellyfin.Plugin.ThemeManager.Tests;
 public class CatalogTests
 {
     private static readonly Assembly _pluginAssembly = typeof(ThemeManagerPlugin).Assembly;
+    private const string CatalogResourcePrefix = "Jellyfin.Plugin.ThemeManager.Resources.catalog.";
+
+    private static IReadOnlyList<string> CatalogResourceNames() => _pluginAssembly.GetManifestResourceNames()
+        .Where(name => name.StartsWith(CatalogResourcePrefix, StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal))
+        .ToList();
 
     private static ThemeCatalog LoadCatalog()
     {
-        using var stream = _pluginAssembly.GetManifestResourceStream("Jellyfin.Plugin.ThemeManager.Resources.themes.json");
-        Assert.NotNull(stream);
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var entries = new List<ThemeCatalogEntry>();
 
-        var catalog = JsonSerializer.Deserialize<ThemeCatalog>(stream, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        Assert.NotNull(catalog);
-        return catalog;
+        foreach (var name in CatalogResourceNames())
+        {
+            using var stream = _pluginAssembly.GetManifestResourceStream(name);
+            Assert.NotNull(stream);
+
+            var entry = JsonSerializer.Deserialize<ThemeCatalogEntry>(stream, options);
+            Assert.NotNull(entry);
+            entries.Add(entry);
+        }
+
+        return new ThemeCatalog { Themes = entries };
     }
 
     [Fact]
@@ -69,6 +82,22 @@ public class CatalogTests
             {
                 Assert.True(ids.Contains(required), $"{entry.Id} requires '{required}', which is not in the catalog");
             }
+        }
+    }
+
+    [Fact]
+    public void EachFileNameMatchesTheIdInsideIt()
+    {
+        // Catches the case where a PR renames or copy-pastes a file but forgets to update the
+        // id field, or vice versa. Either way the entry becomes unreachable by its own filename.
+        foreach (var name in CatalogResourceNames())
+        {
+            var fileName = name[CatalogResourcePrefix.Length..^".json".Length];
+
+            using var stream = _pluginAssembly.GetManifestResourceStream(name);
+            var entry = JsonSerializer.Deserialize<ThemeCatalogEntry>(stream!, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+            Assert.Equal(fileName, entry?.Id);
         }
     }
 

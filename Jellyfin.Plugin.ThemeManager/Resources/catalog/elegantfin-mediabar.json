@@ -1,0 +1,23 @@
+{
+  "id": "elegantfin-mediabar",
+  "name": "ElegantFin: Media Bar support",
+  "author": "lscambo13",
+  "description": "Styles the Jellyfin Media Bar plugin to match ElegantFin.",
+  "homepage": "https://github.com/lscambo13/ElegantFin",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/assets/add-ons/media-bar-plugin-support-latest-min.css",
+  "kind": "Addon",
+  "family": "ElegantFin",
+  "requires": [
+    "elegantfin"
+  ],
+  "tags": [
+    "plugin",
+    "media-bar"
+  ],
+  "swatch": [
+    "#12141c",
+    "#252b3d",
+    "#00a4dc"
+  ]
+}

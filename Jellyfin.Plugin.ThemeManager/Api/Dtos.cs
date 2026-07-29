@@ -8,8 +8,6 @@ public class ThemeManagerState
 {
     public IReadOnlyList<ThemeCatalogEntry> Catalog { get; set; } = Array.Empty<ThemeCatalogEntry>();
 
-    public string? CatalogUpdated { get; set; }
-
     public InstalledTheme[] Installed { get; set; } = Array.Empty<InstalledTheme>();
 
     public string? ActiveThemeId { get; set; }

@@ -1,0 +1,19 @@
+{
+  "id": "ultrachromic-light",
+  "name": "Light surface",
+  "author": "CTalvio",
+  "description": "Swaps an Ultrachromic preset over to a light colour scheme.",
+  "homepage": "https://github.com/CTalvio/Ultrachromic",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/CTalvio/Ultrachromic/type/light.css",
+  "kind": "Addon",
+  "family": "Ultrachromic",
+  "tags": [
+    "light"
+  ],
+  "swatch": [
+    "#fafafa",
+    "#e4e4e8",
+    "#3b3b44"
+  ]
+}

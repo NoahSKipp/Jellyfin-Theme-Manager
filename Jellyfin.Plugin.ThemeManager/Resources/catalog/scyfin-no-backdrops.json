@@ -1,0 +1,22 @@
+{
+  "id": "scyfin-no-backdrops",
+  "name": "Scyfin: Disable backdrops",
+  "author": "loof2736",
+  "description": "Removes the full page backdrop images.",
+  "homepage": "https://github.com/loof2736/scyfin",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/loof2736/scyfin@latest/CSS/disable-backdrops-navigation.css",
+  "kind": "Addon",
+  "family": "Scyfin",
+  "requires": [
+    "scyfin"
+  ],
+  "tags": [
+    "performance"
+  ],
+  "swatch": [
+    "#16181d",
+    "#22262e",
+    "#6b7280"
+  ]
+}

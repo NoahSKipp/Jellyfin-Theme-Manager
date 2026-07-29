@@ -12,7 +12,9 @@ namespace Jellyfin.Plugin.ThemeManager.Services;
 /// </summary>
 public class ThemeCatalogService
 {
-    private const string EmbeddedCatalogResource = "Jellyfin.Plugin.ThemeManager.Resources.themes.json";
+    // One embedded resource per catalog entry, so a PR adding a theme touches a single file
+    // instead of a shared array everyone's PR collides on.
+    private const string CatalogResourcePrefix = "Jellyfin.Plugin.ThemeManager.Resources.catalog.";
 
     private static readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
 
@@ -48,13 +50,26 @@ public class ThemeCatalogService
 
     private static ThemeCatalog ReadEmbeddedCatalog()
     {
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(EmbeddedCatalogResource);
-        if (stream is null)
+        var assembly = Assembly.GetExecutingAssembly();
+        var entries = new List<ThemeCatalogEntry>();
+
+        foreach (var resourceName in assembly.GetManifestResourceNames())
         {
-            return new ThemeCatalog();
+            if (!resourceName.StartsWith(CatalogResourcePrefix, StringComparison.Ordinal)
+                || !resourceName.EndsWith(".json", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            var entry = stream is null ? null : JsonSerializer.Deserialize<ThemeCatalogEntry>(stream, _serializerOptions);
+            if (entry is not null && !string.IsNullOrWhiteSpace(entry.Id))
+            {
+                entries.Add(entry);
+            }
         }
 
-        return JsonSerializer.Deserialize<ThemeCatalog>(stream, _serializerOptions) ?? new ThemeCatalog();
+        return new ThemeCatalog { Themes = entries };
     }
 
     private async Task<ThemeCatalog?> GetRemoteCatalogAsync(
@@ -122,11 +137,6 @@ public class ThemeCatalogService
             merged[entry.Id] = entry;
         }
 
-        return new ThemeCatalog
-        {
-            Version = remote.Version,
-            Updated = remote.Updated ?? bundled.Updated,
-            Themes = merged.Values.ToList()
-        };
+        return new ThemeCatalog { Themes = merged.Values.ToList() };
     }
 }

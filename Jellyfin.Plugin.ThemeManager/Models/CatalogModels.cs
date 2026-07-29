@@ -10,14 +10,11 @@ public enum ThemeKind
 }
 
 /// <summary>
-/// Shape of Resources/themes.json, and of anything set as the extra catalog URL.
+/// The merged catalog. The bundled one is assembled from Resources/catalog/*.json, one file
+/// per entry; the extra catalog URL setting still expects this whole shape as one JSON object.
 /// </summary>
 public class ThemeCatalog
 {
-    public int Version { get; set; } = 1;
-
-    public string? Updated { get; set; }
-
     public IReadOnlyList<ThemeCatalogEntry> Themes { get; set; } = Array.Empty<ThemeCatalogEntry>();
 }
 

@@ -53,7 +53,6 @@ public class ThemeManagerController : ControllerBase
         return new ThemeManagerState
         {
             Catalog = catalog.Themes,
-            CatalogUpdated = catalog.Updated,
             Installed = config.InstalledThemes,
             ActiveThemeId = config.ActiveThemeId,
             EnabledAddonIds = config.EnabledAddonIds,

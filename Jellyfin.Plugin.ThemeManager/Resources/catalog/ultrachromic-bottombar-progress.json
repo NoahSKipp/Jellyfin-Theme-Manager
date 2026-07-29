@@ -1,0 +1,20 @@
+{
+  "id": "ultrachromic-bottombar-progress",
+  "name": "Bottom bar progress",
+  "author": "CTalvio",
+  "description": "Moves the watched progress bar to the bottom edge of each card.",
+  "homepage": "https://github.com/CTalvio/Ultrachromic",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/CTalvio/Ultrachromic/bottombarprogress.css",
+  "kind": "Addon",
+  "family": "Ultrachromic",
+  "tags": [
+    "cards",
+    "progress"
+  ],
+  "swatch": [
+    "#101014",
+    "#2a2a35",
+    "#00a4dc"
+  ]
+}

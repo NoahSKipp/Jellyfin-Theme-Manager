@@ -1,0 +1,21 @@
+{
+  "id": "monochromic",
+  "name": "Monochromic",
+  "author": "CTalvio",
+  "description": "Dark, desaturated and quiet. The most popular of the Ultrachromic presets.",
+  "homepage": "https://github.com/CTalvio/Ultrachromic",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/CTalvio/Ultrachromic/presets/monochromic_preset.css",
+  "kind": "Theme",
+  "family": "Ultrachromic",
+  "tags": [
+    "dark",
+    "minimal",
+    "monochrome"
+  ],
+  "swatch": [
+    "#101010",
+    "#2b2b2b",
+    "#8a8a8a"
+  ]
+}

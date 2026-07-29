@@ -1,0 +1,19 @@
+{
+  "id": "ultrachromic-rounding",
+  "name": "Rounded corners",
+  "author": "CTalvio",
+  "description": "Rounds cards, dialogs and inputs.",
+  "homepage": "https://github.com/CTalvio/Ultrachromic",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/CTalvio/Ultrachromic/rounding.css",
+  "kind": "Addon",
+  "family": "Ultrachromic",
+  "tags": [
+    "shape"
+  ],
+  "swatch": [
+    "#101014",
+    "#2a2a35",
+    "#a0a0b0"
+  ]
+}

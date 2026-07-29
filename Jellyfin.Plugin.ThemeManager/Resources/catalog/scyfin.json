@@ -1,0 +1,20 @@
+{
+  "id": "scyfin",
+  "name": "Scyfin",
+  "author": "loof2736",
+  "description": "Clean dark theme with a reworked navigation drawer. Pairs with the colour variants below.",
+  "homepage": "https://github.com/loof2736/scyfin",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/loof2736/scyfin@latest/CSS/scyfin-theme.css",
+  "kind": "Theme",
+  "family": "Scyfin",
+  "tags": [
+    "dark",
+    "clean"
+  ],
+  "swatch": [
+    "#16181d",
+    "#22262e",
+    "#00a4dc"
+  ]
+}

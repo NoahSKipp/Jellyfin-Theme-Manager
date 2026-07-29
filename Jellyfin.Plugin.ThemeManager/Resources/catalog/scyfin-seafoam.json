@@ -1,0 +1,23 @@
+{
+  "id": "scyfin-seafoam",
+  "name": "Scyfin: Seafoam",
+  "author": "loof2736",
+  "description": "Green accent variant.",
+  "homepage": "https://github.com/loof2736/scyfin",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/loof2736/scyfin@latest/CSS/theme-seafoam.css",
+  "kind": "Addon",
+  "family": "Scyfin",
+  "requires": [
+    "scyfin"
+  ],
+  "tags": [
+    "accent",
+    "green"
+  ],
+  "swatch": [
+    "#16181d",
+    "#22262e",
+    "#3ddc97"
+  ]
+}

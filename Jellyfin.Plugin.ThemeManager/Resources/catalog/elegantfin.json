@@ -1,0 +1,21 @@
+{
+  "id": "elegantfin",
+  "name": "ElegantFin",
+  "author": "lscambo13",
+  "description": "Rounded, glassy restyle of the whole web client, with a matching login page.",
+  "homepage": "https://github.com/lscambo13/ElegantFin",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css",
+  "kind": "Theme",
+  "family": "ElegantFin",
+  "tags": [
+    "dark",
+    "rounded",
+    "glass"
+  ],
+  "swatch": [
+    "#12141c",
+    "#252b3d",
+    "#00a4dc"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "novachromic",
+  "name": "Novachromic",
+  "author": "CTalvio",
+  "description": "Ultrachromic with a brighter, higher contrast surface treatment.",
+  "homepage": "https://github.com/CTalvio/Ultrachromic",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/CTalvio/Ultrachromic/presets/novachromic_preset.css",
+  "kind": "Theme",
+  "family": "Ultrachromic",
+  "tags": [
+    "dark",
+    "contrast"
+  ],
+  "swatch": [
+    "#0d1117",
+    "#1f6feb",
+    "#58a6ff"
+  ]
+}

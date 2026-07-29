@@ -1,0 +1,23 @@
+{
+  "id": "scyfin-oled",
+  "name": "Scyfin: OLED",
+  "author": "loof2736",
+  "description": "True black surfaces for OLED panels.",
+  "homepage": "https://github.com/loof2736/scyfin",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/loof2736/scyfin@latest/CSS/theme-oled.css",
+  "kind": "Addon",
+  "family": "Scyfin",
+  "requires": [
+    "scyfin"
+  ],
+  "tags": [
+    "oled",
+    "black"
+  ],
+  "swatch": [
+    "#000000",
+    "#101010",
+    "#00a4dc"
+  ]
+}

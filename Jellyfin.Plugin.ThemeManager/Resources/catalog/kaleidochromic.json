@@ -1,0 +1,21 @@
+{
+  "id": "kaleidochromic",
+  "name": "Kaleidochromic",
+  "author": "CTalvio",
+  "description": "Ultrachromic preset that tints the interface from each title's own artwork.",
+  "homepage": "https://github.com/CTalvio/Ultrachromic",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/CTalvio/Ultrachromic/presets/kaleidochromic_preset.css",
+  "kind": "Theme",
+  "family": "Ultrachromic",
+  "tags": [
+    "dark",
+    "colorful",
+    "dynamic"
+  ],
+  "swatch": [
+    "#1a0f2b",
+    "#7b2ff7",
+    "#f107a3"
+  ]
+}

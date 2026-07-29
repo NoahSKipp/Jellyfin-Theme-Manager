@@ -1,0 +1,23 @@
+{
+  "id": "scyfin-coral",
+  "name": "Scyfin: Coral",
+  "author": "loof2736",
+  "description": "Warm accent variant.",
+  "homepage": "https://github.com/loof2736/scyfin",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/loof2736/scyfin@latest/CSS/theme-coral.css",
+  "kind": "Addon",
+  "family": "Scyfin",
+  "requires": [
+    "scyfin"
+  ],
+  "tags": [
+    "accent",
+    "coral"
+  ],
+  "swatch": [
+    "#16181d",
+    "#22262e",
+    "#ff6f61"
+  ]
+}

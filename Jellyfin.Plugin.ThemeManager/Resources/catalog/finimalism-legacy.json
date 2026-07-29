@@ -1,0 +1,21 @@
+{
+  "id": "finimalism-legacy",
+  "name": "Finimalism (10.9 build)",
+  "author": "tedhinklater",
+  "description": "The older Finimalism build, kept for servers still on Jellyfin 10.9.",
+  "homepage": "https://github.com/tedhinklater/finimalism",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/tedhinklater/finimalism@main/Finimalism11.css",
+  "kind": "Theme",
+  "family": "Finimalism",
+  "tags": [
+    "dark",
+    "minimal",
+    "legacy"
+  ],
+  "swatch": [
+    "#000000",
+    "#1c1c1e",
+    "#b0b0b5"
+  ]
+}

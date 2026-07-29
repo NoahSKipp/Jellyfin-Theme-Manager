@@ -1,0 +1,22 @@
+{
+  "id": "scyfin-snow",
+  "name": "Scyfin: Snow",
+  "author": "loof2736",
+  "description": "Light colour scheme for Scyfin.",
+  "homepage": "https://github.com/loof2736/scyfin",
+  "license": "MIT",
+  "url": "https://cdn.jsdelivr.net/gh/loof2736/scyfin@latest/CSS/theme-snow.css",
+  "kind": "Addon",
+  "family": "Scyfin",
+  "requires": [
+    "scyfin"
+  ],
+  "tags": [
+    "light"
+  ],
+  "swatch": [
+    "#f5f6f8",
+    "#dfe3e8",
+    "#00a4dc"
+  ]
+}
