@@ -131,9 +131,20 @@ Credit and bug reports belong upstream:
 
 ### Adding your own catalog
 
-Point **Extra catalog URL** at a JSON file shaped like
-[`Resources/themes.json`](Jellyfin.Plugin.ThemeManager/Resources/themes.json). Entries are merged over
-the bundled list, and an entry that reuses a bundled id replaces it.
+Point **Extra catalog URL** at a JSON file you host yourself, shaped like:
+
+```json
+{ "themes": [ { "id": "...", "name": "...", "url": "https://...", "kind": "Theme" } ] }
+```
+
+Same fields as a [bundled entry](CONTRIBUTING.md#the-schema). Entries are merged over the bundled
+list, and an entry that reuses a bundled id replaces it. This is the fast path for a theme only
+you use, or for testing one before proposing it upstream. Nothing here needs a PR or a release.
+
+### Getting a theme into the bundled catalog
+
+Want your theme (or someone else's, with their say-so) to ship with the plugin itself, so it
+shows up for everyone without them typing a URL? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## API
 
