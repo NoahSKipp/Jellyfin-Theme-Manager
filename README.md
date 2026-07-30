@@ -182,3 +182,7 @@ integrity of the bundled catalog.
 
 Remove the plugin, then clear the managed block from **Dashboard → General → Custom CSS** if it is
 still there. Downloaded themes and uploaded images live in the plugin's data folder and go with it.
+
+## License
+
+[MIT](LICENSE).
